@@ -8,16 +8,24 @@ type ChatComposerProps = {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
+  disabled?: boolean;
   className?: string;
   compact?: boolean;
 };
 
-export function ChatComposer({ value, onChange, onSubmit, className, compact = false }: ChatComposerProps) {
+export function ChatComposer({
+  value,
+  onChange,
+  onSubmit,
+  disabled = false,
+  className,
+  compact = false,
+}: ChatComposerProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function submit() {
     const clean = value.trim();
-    if (!clean) return;
+    if (!clean || disabled) return;
     onSubmit(clean);
   }
 
@@ -67,7 +75,7 @@ export function ChatComposer({ value, onChange, onSubmit, className, compact = f
         <Button
           type="submit"
           size="icon"
-          disabled={!value.trim()}
+          disabled={disabled || !value.trim()}
           className="rounded-full bg-primary text-primary-foreground shadow-none hover:bg-primary/90"
           aria-label="Enviar mensagem"
         >

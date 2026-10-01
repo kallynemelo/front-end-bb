@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
+import { ApiError, sendChat } from "@/lib/api/chat";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -138,6 +139,7 @@ function Index() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
 
   const recentConversations = useMemo<RecentConversation[]>(
     () => conversations.map(({ id, title, preview }) => ({ id, title, preview })),
@@ -168,20 +170,46 @@ function Index() {
     setMobileMenuOpen(false);
   }
 
-  function sendMessage(text: string) {
+  async function sendMessage(text: string) {
     const clean = text.trim();
-    if (!clean) return;
+    if (!clean || isSending) return;
 
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: clean,
-    };
-    const assistantMessage = createMockAssistantReply(clean);
+    const stamp = Date.now();
+    const userMessage: ChatMessage = { id: `user-${stamp}`, role: "user", content: clean };
 
-    setMessages((current) => [...current, userMessage, assistantMessage]);
+    setMessages((current) => [...current, userMessage]);
     setActiveConversationId(null);
     setInput("");
+    setIsSending(true);
+
+    try {
+      // POST http://localhost:8080/api/chat (via proxy do Vite em /api/chat)
+      const data = await sendChat(clean);
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${stamp}`,
+        role: "assistant",
+        content: `Requisição processada pelo modelo ${data.model}. O backend retornou apenas o consumo; veja a estimativa ambiental abaixo.`,
+        metrics: {
+          tokens: data.environmentalImpact.totalTokens,
+          energyWh: data.environmentalImpact.energyConsumedWh,
+          carbonG: data.environmentalImpact.carbonFootprintGrams,
+          waterMl: data.environmentalImpact.waterConsumedMl,
+          model: data.model,
+          promptTokens: data.usage.promptTokens,
+          completionTokens: data.usage.completionTokens,
+        },
+      };
+      setMessages((current) => [...current, assistantMessage]);
+    } catch (error) {
+      const message =
+        error instanceof ApiError ? error.message : "Erro inesperado ao falar com o backend.";
+      setMessages((current) => [
+        ...current,
+        { id: `error-${stamp}`, role: "assistant", content: message, isError: true },
+      ]);
+    } finally {
+      setIsSending(false);
+    }
   }
 
   return (
@@ -217,6 +245,7 @@ function Index() {
             input={input}
             onInputChange={setInput}
             onSend={sendMessage}
+            isSending={isSending}
             onSuggestion={(text) => setInput(text)}
           />
         ) : null}
@@ -285,10 +314,18 @@ type ChatWorkspaceProps = {
   input: string;
   onInputChange: (value: string) => void;
   onSend: (value: string) => void;
+  isSending: boolean;
   onSuggestion: (value: string) => void;
 };
 
-function ChatWorkspace({ messages, input, onInputChange, onSend, onSuggestion }: ChatWorkspaceProps) {
+function ChatWorkspace({
+  messages,
+  input,
+  onInputChange,
+  onSend,
+  isSending,
+  onSuggestion,
+}: ChatWorkspaceProps) {
   const isEmpty = messages.length === 0;
 
   if (isEmpty) {
@@ -309,7 +346,7 @@ function ChatWorkspace({ messages, input, onInputChange, onSend, onSuggestion }:
               </p>
             </div>
 
-            <ChatComposer value={input} onChange={onInputChange} onSubmit={onSend} />
+            <ChatComposer value={input} onChange={onInputChange} onSubmit={onSend} disabled={isSending} />
 
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               {promptSuggestions.map(({ icon: Icon, title, text }) => (
@@ -348,12 +385,15 @@ function ChatWorkspace({ messages, input, onInputChange, onSend, onSuggestion }:
         </div>
         <div className="flex-1 pb-36 pt-2 sm:pt-4">
           {messages.map((message) => <MessageBubble key={message.id} message={message} />)}
+          {isSending ? (
+            <p className="mx-auto max-w-3xl px-6 py-3 text-sm text-muted-foreground">Consultando o backend…</p>
+          ) : null}
         </div>
       </div>
       <div className="absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-chat-canvas via-chat-canvas to-transparent px-4 pb-3 pt-8 sm:px-6 sm:pb-5">
         <div className="mx-auto max-w-3xl">
-          <ChatComposer compact value={input} onChange={onInputChange} onSubmit={onSend} />
-          <p className="mt-2 text-center text-[10px] text-muted-foreground">Respostas mockadas para demonstração da experiência conversacional.</p>
+          <ChatComposer compact value={input} onChange={onInputChange} onSubmit={onSend} disabled={isSending} />
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">Consumo e impacto ambiental retornados pelo backend (porta 8080).</p>
         </div>
       </div>
     </main>
@@ -489,32 +529,4 @@ function PreferenceRow({ title, description, defaultChecked }: { title: string; 
       <Switch defaultChecked={defaultChecked} aria-label={title} />
     </div>
   );
-}
-
-function createMockAssistantReply(prompt: string): ChatMessage {
-  const normalized = prompt.toLocaleLowerCase("pt-BR");
-  const requestsImpact = ["impacto", "pegada", "água", "agua", "energia", "co2", "carbono"].some((term) => normalized.includes(term));
-
-  if (requestsImpact) {
-    const inputTokens = Math.max(1, Math.ceil(prompt.length / 3.5));
-    const outputTokens = inputTokens * 2;
-    const tokens = inputTokens + outputTokens;
-    const energyWh = (inputTokens * 0.001 + outputTokens * 0.004) * 6;
-    const carbonG = (energyWh / 1000) * 436;
-    const waterMl = (energyWh / 1000) * 500;
-
-    return {
-      id: `assistant-${Date.now() + 1}`,
-      role: "assistant",
-      content: "Acionei o mock da ferramenta ImpactaIA. Esta estimativa serve somente para demonstrar como uma ferramenta pode aparecer integrada à conversa; não é uma medição real de infraestrutura.",
-      metrics: { tokens, waterMl, energyWh, carbonG },
-    };
-  }
-
-  return {
-    id: `assistant-${Date.now() + 1}`,
-    role: "assistant",
-    content:
-      "Esta é uma resposta simulada para demonstrar a nova experiência conversacional. O front-end já está preparado para exibir histórico, ações de mensagem, ferramentas e futuras respostas de um backend ou serviço de IA sem alterar o fluxo visual principal.",
-  };
 }

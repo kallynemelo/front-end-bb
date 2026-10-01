@@ -2,6 +2,7 @@ import { Bot, Copy, Droplets, Leaf, ThumbsDown, ThumbsUp, UserRound, Zap } from 
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { formatImpact } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export type ChatMessage = {
@@ -13,7 +14,12 @@ export type ChatMessage = {
     waterMl: number;
     energyWh: number;
     carbonG: number;
+    // Preenchidos quando a resposta vem do backend (POST /api/chat)
+    model?: string;
+    promptTokens?: number;
+    completionTokens?: number;
   };
+  isError?: boolean;
 };
 
 type MessageBubbleProps = {
@@ -40,7 +46,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               : "pt-0.5 text-foreground",
           )}
         >
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <p className={cn("whitespace-pre-wrap", message.isError && "text-destructive")}>
+            {message.content}
+          </p>
           {message.metrics ? <EnvironmentalMetrics metrics={message.metrics} /> : null}
         </div>
 
@@ -72,9 +80,9 @@ function MessageAction({ label, children }: { label: string; children: ReactNode
 
 function EnvironmentalMetrics({ metrics }: { metrics: NonNullable<ChatMessage["metrics"]> }) {
   const cards = [
-    { icon: Droplets, label: "Água", value: `${metrics.waterMl.toFixed(1).replace(".", ",")} mL` },
-    { icon: Zap, label: "Energia", value: `${metrics.energyWh.toFixed(2).replace(".", ",")} Wh` },
-    { icon: Leaf, label: "CO₂e", value: `${metrics.carbonG.toFixed(2).replace(".", ",")} g` },
+    { icon: Droplets, label: "Água", value: `${formatImpact(metrics.waterMl)} mL` },
+    { icon: Zap, label: "Energia", value: `${formatImpact(metrics.energyWh)} Wh` },
+    { icon: Leaf, label: "CO₂e", value: `${formatImpact(metrics.carbonG)} g` },
   ];
 
   return (
@@ -82,7 +90,13 @@ function EnvironmentalMetrics({ metrics }: { metrics: NonNullable<ChatMessage["m
       <div className="flex items-center justify-between border-b border-border px-4 py-3">
         <div>
           <strong className="block text-sm text-primary">ImpactaIA</strong>
-          <span className="text-xs text-muted-foreground">Estimativa ambiental da interação</span>
+          <span className="text-xs text-muted-foreground">
+            Estimativa ambiental da interação
+            {metrics.model ? ` · ${metrics.model}` : ""}
+            {metrics.promptTokens !== undefined && metrics.completionTokens !== undefined
+              ? ` · ${metrics.promptTokens} entrada / ${metrics.completionTokens} saída`
+              : ""}
+          </span>
         </div>
         <span className="rounded-full bg-success-soft px-2.5 py-1 text-[11px] font-semibold text-success">{metrics.tokens} tokens</span>
       </div>

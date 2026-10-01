@@ -6,7 +6,7 @@ Protótipo front-end de uma experiência conversacional com identidade visual in
 
 A tela principal foi reorganizada como uma aplicação conversacional com sidebar responsiva, nova conversa, histórico mockado, área principal de chat, sugestões de prompts, ferramentas e perfil do usuário. A funcionalidade ambiental existente foi preservada como a ferramenta demonstrativa **ImpactaIA**, integrada visualmente às respostas do chat.
 
-Não há integração real com IA, autenticação ou backend nesta versão. As mensagens, conversas, dados do perfil e resultados das ferramentas são mocks de interface.
+O chat envia `POST /api/chat` ao backend (porta 8080) e exibe o consumo/impacto ambiental retornado. Histórico da sidebar e perfil continuam sendo mocks de interface. Não há autenticação.
 
 ## Requisitos
 
@@ -20,13 +20,12 @@ npm install
 npm run dev
 ```
 
-O Vite normalmente disponibiliza a aplicação em:
+| Serviço  | Porta | URL                   |
+| -------- | ----- | --------------------- |
+| Frontend | 3000  | http://localhost:3000 |
+| Backend  | 8080  | http://localhost:8080 |
 
-```text
-http://localhost:5173
-```
-
-Caso a porta esteja ocupada ou o ambiente aplique uma configuração própria, utilize a URL exibida pelo Vite no terminal.
+Copie `.env.example` para `.env`. Em desenvolvimento, deixe `VITE_API_BASE_URL` vazio: o Vite faz proxy de `/api/*` para `BACKEND_URL` (padrão `http://localhost:8080`), sem CORS. Se a porta 3000 estiver ocupada, o Vite falha (`strictPort`) em vez de trocar de porta.
 
 ## Validações
 
