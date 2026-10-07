@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 
 // "value" é o texto enviado ao back no campo "model". Confirme os nomes aceitos pelo back.
 const MODELS = [
-  { label: "GPT-3", value: DEFAULT_MODEL },
-  { label: "Gemini", value: "gemini" },
+  { label: "GPT-4", value: DEFAULT_MODEL },
+  { label: "Gemini 2.5", value: "gemini" },
 ];
 
 const integer = new Intl.NumberFormat("pt-BR");
@@ -208,7 +208,7 @@ function ResultContent({ result, error, isCalculating }: ResultContentProps) {
     return (
       <p className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
         <Spinner aria-label="Calculando" />
-        Consultando o backend...
+        Carregando...
       </p>
     );
   }

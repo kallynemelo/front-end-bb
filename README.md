@@ -1,4 +1,4 @@
-# BB Inteligência — Front-end conversacional
+# ImpactaIA — Front-end conversacional
 
 Protótipo front-end de uma experiência conversacional com identidade visual inspirada no Banco do Brasil. A aplicação usa React 19, TypeScript, Vite 8, TanStack Start/Router e Tailwind CSS 4, preservando a arquitetura original do projeto.
 

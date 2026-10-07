@@ -55,7 +55,7 @@ export function ChatComposer({
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}
         rows={compact ? 2 : 3}
-        placeholder="Envie uma mensagem para o BB Inteligência"
+        placeholder="Envie uma mensagem para o ImpactaIA"
         className={cn(
           "block w-full resize-none bg-transparent px-3 py-2.5 text-[15px] leading-6 text-foreground outline-none placeholder:text-muted-foreground",
           compact ? "min-h-12 max-h-36" : "min-h-20 max-h-48",

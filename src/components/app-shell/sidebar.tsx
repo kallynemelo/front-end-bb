@@ -71,7 +71,7 @@ export function Sidebar({
           </span>
           {!isCompact ? (
             <span className="min-w-0 text-left">
-              <strong className="block truncate text-sm font-semibold text-white">BB Inteligência</strong>
+              <strong className="block truncate text-sm font-semibold text-white">ImpactaIA</strong>
               <span className="block truncate text-xs text-sidebar-muted">Assistente conversacional</span>
             </span>
           ) : null}
