@@ -1,24 +1,39 @@
-# Banco do Brasil Eco Tracker
+# BB Inteligência — Front-end conversacional
 
-Quero que faça uma aplicação em react com de acordo com os prints. A tela inicial pode ser uma tela de prompt estilo chatgpt em anexo tbm, mas bote de acordo com as cores utilizadas pelo banco do brasil. Na 2 tela com o prompt já dentro daquele espaço vai aparecer a pegada ecológica como no exemplo no ultimo print. coloque apenas Analisar e Histórico . Adicione a imagem do banco do brasil em cima, sua cores usadas nos exemplos.
+Protótipo front-end de uma experiência conversacional com identidade visual inspirada no Banco do Brasil. A aplicação usa React 19, TypeScript, Vite 8, TanStack Start/Router e Tailwind CSS 4, preservando a arquitetura original do projeto.
 
-This project was built with [Lovable](https://lovable.dev).
+## O que foi implementado
 
-## Build with Lovable
+A tela principal é uma **calculadora de pegada ecológica de IA**, em layout de duas colunas: à esquerda o campo para escrever o prompt (com contagem de caracteres e de tokens de entrada) e à direita o resultado (tokens, energia, CO₂e e água). O botão **Calcular** fica entre os dois campos. Há ainda os atalhos Carregar exemplo, Limpar e Copiar resultado.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/9558a896-cd2a-4bd9-a521-40d7e01d48e7).
+O cálculo envia `POST /api/chat` ao backend (porta 8080) e exibe o consumo/impacto ambiental retornado. Não há autenticação.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+## Requisitos
 
-## Development
+- Node.js 22.x recomendado
+- npm 10.x ou compatível
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+## Executar localmente
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+```bash
+npm install
 npm run dev
 ```
+
+| Serviço  | Porta | URL                   |
+| -------- | ----- | --------------------- |
+| Frontend | 3000  | http://localhost:3000 |
+| Backend  | 8080  | http://localhost:8080 |
+
+Copie `.env.example` para `.env`. Em desenvolvimento, deixe `VITE_API_BASE_URL` vazio: o Vite faz proxy de `/api/*` para `BACKEND_URL` (padrão `http://localhost:8080`), sem CORS. Se a porta 3000 estiver ocupada, o Vite falha (`strictPort`) em vez de trocar de porta.
+
+## Validações
+
+```bash
+npm run build
+npm run lint
+```
+
+## Estrutura preservada
+
+O projeto continua utilizando o sistema de rotas e inicialização existentes. Não foram adicionadas novas dependências nem alteradas as versões principais das bibliotecas.
