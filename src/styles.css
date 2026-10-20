@@ -31,100 +31,115 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-brand-yellow: var(--brand-yellow);
+  --color-brand-blue: var(--brand-blue);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
-  --color-water: var(--water);
-  --color-warning: var(--warning);
-  --color-warning-border: var(--warning-border);
-  --color-warning-foreground: var(--warning-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-chat-canvas: var(--chat-canvas);
+  --color-user-message: var(--user-message);
+  --color-composer-border: var(--composer-border);
+  --shadow-panel: var(--shadow-panel);
+  --shadow-composer: var(--shadow-composer);
+  --shadow-composer-focus: var(--shadow-composer-focus);
+  --shadow-brand-mark: var(--shadow-brand-mark);
 }
 
 :root {
-  --font-body: "Roboto", "Arial", sans-serif;
-  --font-heading: "Roboto", "Arial", sans-serif;
-  --font-numeric: "Courier New", monospace;
-  --radius: 0.55rem;
-  --background: oklch(0.97 0.006 250);
-  --foreground: oklch(0.23 0.045 258);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.23 0.045 258);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.23 0.045 258);
-  --primary: #0038a8;
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.93 0.025 250);
-  --secondary-foreground: oklch(0.31 0.11 257);
-  --muted: oklch(0.95 0.01 250);
-  --muted-foreground: oklch(0.49 0.045 255);
-  --accent: oklch(0.47 0.16 256);
-  --accent-foreground: oklch(0.99 0 0);
-  --destructive: oklch(0.56 0.22 27);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.84 0.035 251);
-  --input: oklch(0.84 0.035 251);
-  --ring: oklch(0.55 0.16 257);
-  --brand-yellow: #fdf500;
-  --success: oklch(0.52 0.15 160);
-  --success-soft: oklch(0.94 0.04 160);
-  --water: oklch(0.56 0.17 250);
-  --warning: oklch(0.97 0.06 92);
-  --warning-border: oklch(0.78 0.16 83);
-  --warning-foreground: oklch(0.47 0.1 70);
-  --shadow-header: 0 2px 9px color-mix(in oklab, var(--primary) 30%, transparent);
-  --shadow-panel: 0 1px 2px color-mix(in oklab, var(--primary) 8%, transparent);
-  --shadow-composer: 0 18px 45px color-mix(in oklab, var(--primary) 15%, transparent);
-  --shadow-brand: 0 8px 24px color-mix(in oklab, var(--brand-yellow) 35%, transparent);
-}
+  --font-body: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-heading: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-numeric: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --radius: 0.75rem;
 
-@theme inline {
-  --shadow-header: var(--shadow-header);
-  --shadow-panel: var(--shadow-panel);
-  --shadow-composer: var(--shadow-composer);
-  --shadow-brand: var(--shadow-brand);
+  --background: #f7f8fb;
+  --foreground: #192234;
+  --card: #ffffff;
+  --card-foreground: #192234;
+  --popover: #ffffff;
+  --popover-foreground: #192234;
+  --primary: #003d9e;
+  --primary-foreground: #ffffff;
+  --secondary: #eef3fb;
+  --secondary-foreground: #173d77;
+  --muted: #f0f2f5;
+  --muted-foreground: #667085;
+  --accent: #eef3fb;
+  --accent-foreground: #003d9e;
+  --destructive: #d92d20;
+  --destructive-foreground: #ffffff;
+  --border: #dde3ec;
+  --input: #d7dee9;
+  --ring: #1c64c8;
+
+  --brand-blue: #003d9e;
+  --brand-yellow: #fff200;
+  --success: #087a55;
+  --success-soft: #e8f7f0;
+
+  --sidebar: #062b65;
+  --sidebar-foreground: #ffffff;
+  --sidebar-muted: #b8c8de;
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --chat-canvas: #ffffff;
+  --user-message: #eef3fb;
+  --composer-border: #d4dce8;
+
+  --shadow-panel: 0 1px 2px rgba(16, 24, 40, 0.04), 0 3px 8px rgba(16, 24, 40, 0.03);
+  --shadow-composer: 0 10px 30px rgba(25, 34, 52, 0.08), 0 2px 8px rgba(25, 34, 52, 0.05);
+  --shadow-composer-focus: 0 12px 36px rgba(0, 61, 158, 0.13), 0 0 0 1px rgba(0, 61, 158, 0.1);
+  --shadow-brand-mark: 0 10px 24px rgba(0, 61, 158, 0.2);
 }
 
 @layer base {
-  * { border-color: var(--border); }
-  html { background: var(--background); }
-  body { margin: 0; background: var(--background); color: var(--foreground); font-family: var(--font-body); }
-  button { letter-spacing: 0; }
-}
+  * {
+    border-color: var(--border);
+  }
 
-@utility result-tab {
-  border-radius: 0;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  padding: 0.9rem 1rem 0.75rem;
-  box-shadow: none;
-  color: var(--muted-foreground);
-  &[data-state="active"] { border-bottom-color: var(--primary); background: transparent; color: var(--primary); box-shadow: none; }
-}
+  html {
+    background: var(--background);
+  }
 
-@utility metric-card {
-  min-height: 10.25rem;
-  border-radius: var(--radius);
-  padding: 1rem;
-}
-@utility metric-water { background: oklch(0.94 0.03 250); color: var(--water); }
-@utility metric-energy { background: oklch(0.97 0.055 91); color: oklch(0.72 0.16 75); }
-@utility metric-carbon { background: var(--success-soft); color: var(--success); }
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
 
-@utility summary-card { min-height: 7.25rem; border-radius: var(--radius); padding: 1rem; }
-@utility summary-blue { background: oklch(0.93 0.025 250); color: var(--primary); }
-@utility summary-water { background: oklch(0.94 0.035 238); color: var(--water); }
-@utility summary-energy { background: oklch(0.97 0.055 91); color: oklch(0.69 0.16 72); }
-@utility summary-carbon { background: var(--success-soft); color: var(--success); }
+  button,
+  textarea,
+  input {
+    font: inherit;
+  }
 
-@utility prose-panel {
-  min-height: 17rem;
-  border-radius: var(--radius);
-  background: var(--secondary);
-  padding: 1.25rem;
-  & h3 { margin: 0 0 0.65rem; color: var(--primary); font-size: 1rem; font-weight: 700; }
-  & p { margin: 0.5rem 0; color: var(--muted-foreground); font-size: 0.875rem; line-height: 1.65; }
+  button {
+    letter-spacing: 0;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--brand-yellow) 70%, white);
+    color: var(--brand-blue);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  main { animation: enter 280ms ease-out; }
-  @keyframes enter { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+  main > div:first-child {
+    animation: content-enter 220ms ease-out;
+  }
+
+  @keyframes content-enter {
+    from {
+      opacity: 0;
+      transform: translateY(3px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
