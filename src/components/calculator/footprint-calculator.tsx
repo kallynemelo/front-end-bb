@@ -1,5 +1,5 @@
 import { Calculator, Check, Copy, Droplets, Eraser, Leaf, Zap } from "lucide-react";
-import { useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -27,12 +27,28 @@ export function FootprintCalculator() {
   const [isCalculating, setIsCalculating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [model, setModel] = useState(DEFAULT_MODEL);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const cleanPrompt = prompt.trim();
   const canCalculate = cleanPrompt.length > 0 && !isCalculating;
   // Só mostra os tokens do prompt enquanto o texto não mudou desde o último cálculo.
-  const promptTokens =
-    result && result.prompt === cleanPrompt ? result.data.usage.promptTokens : null;
+  const isCurrent = result !== null && result.prompt === cleanPrompt;
+  const promptTokens = isCurrent ? result.data.usage.promptTokens : null;
+  const completionTokens = isCurrent ? result.data.usage.completionTokens : null;
+  // O back só estima os tokens de saída; ele não devolve o texto da resposta.
+  const outputText = "";
+  const outputPlaceholder = isCurrent
+    ? "O backend só estima os tokens de saída, não gera o texto da resposta."
+    : cleanPrompt.length > 0
+      ? "Aguardando o cálculo..."
+      : "Aguardando...";
+
+  // Quando o resultado chega, leva a tela até ele (ele fica abaixo do prompt).
+  useEffect(() => {
+    if (result) {
+      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [result]);
 
   async function calculate() {
     if (!canCalculate) return;
@@ -136,39 +152,64 @@ export function FootprintCalculator() {
         </Button>
       </div>
 
-      <div className="mt-3 grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-5">
-        <div className="flex min-w-0 flex-col">
-          <label htmlFor="prompt" className="mb-2 text-sm font-medium text-foreground">
-            Prompt
-          </label>
-          <div className="flex h-72 flex-col overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-1 focus-within:ring-ring lg:h-[calc(100dvh_-_23rem)] lg:min-h-64">
-            <textarea
-              id="prompt"
-              value={prompt}
-              onChange={(event) => setPrompt(event.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Escreva aqui o seu prompt..."
-              className="min-h-0 w-full flex-1 resize-none bg-transparent p-4 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
-            />
-            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
-              <span>{integer.format(prompt.length)} caracteres</span>
-              <span className={cn(promptTokens !== null && "font-semibold text-primary")}>
-                {promptTokens !== null
-                  ? `${integer.format(promptTokens)} tokens de entrada`
-                  : "Os tokens aparecem depois de calcular"}
-              </span>
+      <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:gap-5">
+        <div className="flex min-w-0 flex-col gap-3">
+          <div className="flex min-w-0 flex-col">
+            <label htmlFor="prompt" className="mb-2 text-sm font-medium text-foreground">
+              Prompt de entrada
+            </label>
+            <div className="flex h-56 flex-col overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-1 focus-within:ring-ring lg:h-[calc((100dvh-26rem)/2)] lg:min-h-28">
+              <textarea
+                id="prompt"
+                value={prompt}
+                onChange={(event) => setPrompt(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Escreva aqui o seu prompt de entrada..."
+                className="min-h-0 w-full flex-1 resize-none bg-transparent p-4 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+                <span>{integer.format(prompt.length)} caracteres</span>
+                <span className={cn(promptTokens !== null && "font-semibold text-primary")}>
+                  {promptTokens !== null
+                    ? `${integer.format(promptTokens)} tokens de entrada`
+                    : "Os tokens de entrada aparecem depois de calcular"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col">
+            <label htmlFor="output" className="mb-2 text-sm font-medium text-foreground">
+              Prompt de saída
+            </label>
+            <div className="flex h-40 flex-col overflow-hidden rounded-xl border border-input bg-muted/40 lg:h-[calc((100dvh-26rem)/2)] lg:min-h-28">
+              <textarea
+                id="output"
+                readOnly
+                value={outputText}
+                placeholder={outputPlaceholder}
+                className="min-h-0 w-full flex-1 cursor-default resize-none bg-transparent p-4 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
+                <span>{integer.format(outputText.length)} caracteres</span>
+                <span className={cn(completionTokens !== null && "font-semibold text-primary")}>
+                  {completionTokens !== null
+                    ? `${integer.format(completionTokens)} tokens de saída`
+                    : "Os tokens de saída aparecem depois de calcular"}
+                </span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center lg:pt-8">
+        <div className="flex items-center justify-center lg:self-center">
           <Button
             type="button"
             size="lg"
             onClick={() => void calculate()}
             disabled={!canCalculate}
             aria-busy={isCalculating}
-            className="h-11 w-full gap-2 px-6 text-base font-semibold lg:w-auto"
+            className="h-11 w-full gap-2 px-6 text-base font-semibold sm:w-auto"
           >
             {isCalculating ? <Spinner aria-label="Calculando" /> : <Calculator />}
             Calcular
@@ -180,12 +221,18 @@ export function FootprintCalculator() {
             Resultado
           </span>
           <div
+            ref={resultRef}
             role="region"
             aria-labelledby="result-label"
             aria-live="polite"
-            className="h-72 overflow-y-auto rounded-xl border border-input bg-muted/40 p-4 lg:h-[calc(100dvh_-_23rem)] lg:min-h-64"
+            className="min-h-36 scroll-mb-4 rounded-xl border border-input bg-muted/40 p-4 lg:h-[calc(100dvh-23.5rem)] lg:min-h-66 lg:overflow-y-auto"
           >
-            <ResultContent result={result} error={error} isCalculating={isCalculating} />
+            <ResultContent
+              result={result}
+              error={error}
+              isCalculating={isCalculating}
+              hasPrompt={cleanPrompt.length > 0}
+            />
           </div>
         </div>
       </div>
@@ -201,9 +248,10 @@ type ResultContentProps = {
   result: CalculationResult | null;
   error: string | null;
   isCalculating: boolean;
+  hasPrompt: boolean;
 };
 
-function ResultContent({ result, error, isCalculating }: ResultContentProps) {
+function ResultContent({ result, error, isCalculating, hasPrompt }: ResultContentProps) {
   if (isCalculating) {
     return (
       <p className="flex items-center gap-2 font-mono text-sm text-muted-foreground">
@@ -225,7 +273,9 @@ function ResultContent({ result, error, isCalculating }: ResultContentProps) {
   if (!result) {
     return (
       <p className="font-mono text-sm text-muted-foreground">
-        O resultado da pegada ecológica será exibido aqui...
+        {hasPrompt
+          ? "Clique em Calcular para ver o resultado da pegada ecológica."
+          : "Aguardando o prompt de entrada..."}
       </p>
     );
   }
