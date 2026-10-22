@@ -35,28 +35,9 @@ Quem não está logado e abre `/` ou `/historico` é enviado para `/login`.
 - Tailwind CSS 4 e componentes shadcn/ui (Radix UI)
 - Ícones: lucide-react
 
-## Requisitos
-
-- **Node.js 22** e npm 10 ou superior (front-end)
-- **Java 25** (back-end, o `pom.xml` exige essa versão)
-
 ## Como rodar
 
-### 1. Back-end
-
-Na pasta do back-end (a que tem o `pom.xml`):
-
-```bash
-# Windows
-mvnw.cmd spring-boot:run
-
-# Linux e macOS
-./mvnw spring-boot:run
-```
-
-O back sobe em `http://localhost:8080`. Na primeira vez, o Maven baixa as dependências, o que pode levar alguns minutos.
-
-### 2. Front-end
+### Front-end
 
 Em outro terminal, na pasta do front-end:
 
@@ -67,38 +48,15 @@ npm run dev
 
 Abra `http://localhost:3000`.
 
-| Serviço   | Porta | URL                   |
-| --------- | ----- | --------------------- |
-| Front-end | 3000  | http://localhost:3000 |
-| Back-end  | 8080  | http://localhost:8080 |
-
-Se a porta 3000 estiver ocupada, o `npm run dev` falha em vez de trocar de porta (`strictPort`).
-
-### Variáveis de ambiente
-
-Em desenvolvimento não é preciso configurar nada. O Vite encaminha as chamadas `/api/*` para o back-end, sem problemas de CORS.
-
-| Variável            | Onde vale                 | Padrão                  | Para que serve                                             |
-| ------------------- | ------------------------- | ----------------------- | ---------------------------------------------------------- |
-| `BACKEND_URL`       | `npm run dev` e `preview` | `http://localhost:8080` | Endereço do back-end para o proxy do Vite                  |
-| `VITE_API_BASE_URL` | Build de produção         | vazio                   | Endereço do back-end quando o app roda sem o proxy do Vite |
-
-Exemplo no PowerShell, com o back em outra porta:
-
-```powershell
-$env:BACKEND_URL="http://localhost:9090"; npm run dev
-```
-
 ## Como o front conversa com o back
 
 O front chama `POST /api/chat`.
-```
 
 **Modelos.** O back identifica o tipo pelo nome: qualquer modelo que contenha `gpt` usa o cálculo do GPT, e qualquer um que contenha `gemini` usa o do Gemini. A lista de opções do front fica em `MODELS`, no arquivo `src/components/calculator/footprint-calculator.tsx`.
 
 **Prompt de saída.** O sistema não gera a resposta da IA. Você escreve ou cola o texto no campo, e o back conta os tokens dele. Se o campo ficar vazio, o back apenas estima os tokens de saída a partir do prompt de entrada.
 
-## Contas e histórico (importante)
+## Contas e histórico
 
 O back-end ainda não tem endpoints de login, cadastro ou histórico. Por isso, **hoje tudo isso fica salvo no navegador** (`localStorage`):
 
@@ -118,7 +76,7 @@ Para usar um back-end de verdade, troque as funções `login`, `register` e `log
 
 ## Estrutura
 
-```
+```bash
 src/
 ├── assets/icones/           logos do Banco do Brasil
 ├── components/
@@ -134,18 +92,6 @@ src/
 ├── routes/                  páginas: login, cadastro, index, historico
 └── styles.css               cores e estilos globais
 ```
-
-O arquivo `src/routeTree.gen.ts` é gerado automaticamente pelo TanStack Router ao rodar o projeto. Não edite à mão.
-
-## Scripts
-
-| Comando           | O que faz                          |
-| ----------------- | ---------------------------------- |
-| `npm run dev`     | Servidor de desenvolvimento (3000) |
-| `npm run build`   | Build de produção                  |
-| `npm run preview` | Serve o build localmente           |
-| `npm run lint`    | Verifica o código com ESLint       |
-| `npm run format`  | Formata o código com Prettier      |
 
 ## Aviso
 
