@@ -5,6 +5,8 @@ export type ChatRole = "user" | "assistant" | "system";
 export type ChatRequest = {
   model: string;
   messages: { role: ChatRole; content: string }[];
+  // Texto do prompt de saída (resposta da IA), informado pelo usuário.
+  completionText?: string;
 };
 
 export type ChatResponse = {
@@ -63,11 +65,12 @@ function assertChatResponse(data: unknown): asserts data is ChatResponse {
 
 export async function sendChat(
   content: string,
-  options: { model?: string; signal?: AbortSignal } = {},
+  options: { model?: string; completionText?: string; signal?: AbortSignal } = {},
 ): Promise<ChatResponse> {
   const body: ChatRequest = {
     model: options.model ?? DEFAULT_MODEL,
     messages: [{ role: "user", content }],
+    ...(options.completionText ? { completionText: options.completionText } : {}),
   };
 
   let response: Response;
