@@ -1,10 +1,14 @@
-// Contrato com o backend (porta 8080) — POST /api/chat
+// Contrato com o backend (porta 8080) — POST /api/chat (exige JWT: Authorization: Bearer <token>)
+
+import { clearSession, getToken } from "@/lib/auth";
 
 export type ChatRole = "user" | "assistant" | "system";
 
 export type ChatRequest = {
   model: string;
   messages: { role: ChatRole; content: string }[];
+  // Texto do prompt de saída (resposta da IA), informado pelo usuário.
+  completionText?: string;
 };
 
 export type ChatResponse = {
@@ -63,24 +67,40 @@ function assertChatResponse(data: unknown): asserts data is ChatResponse {
 
 export async function sendChat(
   content: string,
-  options: { model?: string; signal?: AbortSignal } = {},
+  options: { model?: string; completionText?: string; signal?: AbortSignal } = {},
 ): Promise<ChatResponse> {
   const body: ChatRequest = {
     model: options.model ?? DEFAULT_MODEL,
     messages: [{ role: "user", content }],
+    ...(options.completionText ? { completionText: options.completionText } : {}),
   };
+
+  const token = getToken();
+  if (!token) {
+    clearSession();
+    throw new ApiError("Sua sessão expirou. Entre novamente.", 401);
+  }
 
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
       ...(options.signal ? { signal: options.signal } : {}),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ApiError("Não foi possível conectar ao backend (porta 8080). Ele está em execução?");
+  }
+
+  if (response.status === 401) {
+    clearSession();
+    throw new ApiError("Sua sessão expirou. Entre novamente.", 401);
   }
 
   if (!response.ok) {

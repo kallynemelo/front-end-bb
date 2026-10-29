@@ -4,24 +4,30 @@ import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ApiError, DEFAULT_MODEL, sendChat, type ChatResponse } from "@/lib/api/chat";
+import { useAuth } from "@/lib/auth";
 import { formatImpact } from "@/lib/format";
+import { addHistoryEntry } from "@/lib/history";
 import { cn } from "@/lib/utils";
 
 // "value" é o texto enviado ao back no campo "model". Confirme os nomes aceitos pelo back.
 const MODELS = [
   { label: "GPT-4", value: DEFAULT_MODEL },
   { label: "Gemini 2.5", value: "gemini" },
+  { label: "Gemini Mini", value: "gemini-mini" },
 ];
 
 const integer = new Intl.NumberFormat("pt-BR");
 
 type CalculationResult = {
   prompt: string;
+  output: string;
   data: ChatResponse;
 };
 
 export function FootprintCalculator() {
+  const { user } = useAuth();
   const [prompt, setPrompt] = useState("");
+  const [output, setOutput] = useState("");
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -30,18 +36,13 @@ export function FootprintCalculator() {
   const resultRef = useRef<HTMLDivElement>(null);
 
   const cleanPrompt = prompt.trim();
+  const cleanOutput = output.trim();
   const canCalculate = cleanPrompt.length > 0 && !isCalculating;
   // Só mostra os tokens do prompt enquanto o texto não mudou desde o último cálculo.
-  const isCurrent = result !== null && result.prompt === cleanPrompt;
+  const isCurrent =
+    result !== null && result.prompt === cleanPrompt && result.output === cleanOutput;
   const promptTokens = isCurrent ? result.data.usage.promptTokens : null;
   const completionTokens = isCurrent ? result.data.usage.completionTokens : null;
-  // O back só estima os tokens de saída; ele não devolve o texto da resposta.
-  const outputText = "";
-  const outputPlaceholder = isCurrent
-    ? "O backend só estima os tokens de saída, não gera o texto da resposta."
-    : cleanPrompt.length > 0
-      ? "Aguardando o cálculo..."
-      : "Aguardando...";
 
   // Quando o resultado chega, leva a tela até ele (ele fica abaixo do prompt).
   useEffect(() => {
@@ -58,8 +59,9 @@ export function FootprintCalculator() {
 
     try {
       // POST /api/chat (proxy do Vite -> backend na porta 8080)
-      const data = await sendChat(cleanPrompt, { model });
-      setResult({ prompt: cleanPrompt, data });
+      const data = await sendChat(cleanPrompt, { model, completionText: cleanOutput });
+      setResult({ prompt: cleanPrompt, output: cleanOutput, data });
+      if (user) addHistoryEntry(user.email, cleanPrompt, cleanOutput, data);
     } catch (caught) {
       setResult(null);
       setError(
@@ -72,6 +74,7 @@ export function FootprintCalculator() {
 
   function clear() {
     setPrompt("");
+    setOutput("");
     setResult(null);
     setError(null);
     setCopied(false);
@@ -182,16 +185,17 @@ export function FootprintCalculator() {
             <label htmlFor="output" className="mb-2 text-sm font-medium text-foreground">
               Prompt de saída
             </label>
-            <div className="flex h-40 flex-col overflow-hidden rounded-xl border border-input bg-muted/40 lg:h-[calc((100dvh-26rem)/2)] lg:min-h-28">
+            <div className="flex h-40 flex-col overflow-hidden rounded-xl border border-input bg-background focus-within:border-ring focus-within:ring-1 focus-within:ring-ring lg:h-[calc((100dvh-26rem)/2)] lg:min-h-28">
               <textarea
                 id="output"
-                readOnly
-                value={outputText}
-                placeholder={outputPlaceholder}
-                className="min-h-0 w-full flex-1 cursor-default resize-none bg-transparent p-4 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
+                value={output}
+                onChange={(event) => setOutput(event.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Escreva ou cole aqui o prompt de saída (a resposta da IA)..."
+                className="min-h-0 w-full flex-1 resize-none bg-transparent p-4 font-mono text-sm leading-6 text-foreground outline-none placeholder:text-muted-foreground"
               />
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border bg-muted/40 px-4 py-2 text-xs text-muted-foreground">
-                <span>{integer.format(outputText.length)} caracteres</span>
+                <span>{integer.format(output.length)} caracteres</span>
                 <span className={cn(completionTokens !== null && "font-semibold text-primary")}>
                   {completionTokens !== null
                     ? `${integer.format(completionTokens)} tokens de saída`
@@ -238,7 +242,8 @@ export function FootprintCalculator() {
       </div>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        Os resultados são estimativas e podem variar dependendo do modelo de IA, do prompt e de outros fatores.
+        Os resultados são estimativas e podem variar dependendo do modelo de IA, do prompt e de
+        outros fatores.
       </p>
     </section>
   );
@@ -275,7 +280,7 @@ function ResultContent({ result, error, isCalculating, hasPrompt }: ResultConten
       <p className="font-mono text-sm text-muted-foreground">
         {hasPrompt
           ? "Clique em Calcular para ver o resultado da pegada ecológica."
-          : "Aguardando o prompt de entrada..."}
+          : "Aguardando..."}
       </p>
     );
   }
