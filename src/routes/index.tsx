@@ -39,6 +39,9 @@ function Index() {
         </div>
 
         <FootprintCalculator />
+         <p className="mt-3 text-center text-xs text-muted-foreground">
+          Banco do Brasil S.A. — Portal ImpactaIA · CNPJ 00.000.000/0001-91
+        </p>
       </main>
     </AppShell>
   );
