@@ -11,9 +11,8 @@ import { cn } from "@/lib/utils";
 
 // "value" é o texto enviado ao back no campo "model". Confirme os nomes aceitos pelo back.
 const MODELS = [
-  { label: "GPT-4", value: DEFAULT_MODEL },
-  { label: "Gemini 2.5", value: "gemini" },
-  { label: "Gemini Mini", value: "gemini-mini" },
+  { label: "GPT-3", value: DEFAULT_MODEL },
+  { label: "Gemini", value: "gemini" },
 ];
 
 const integer = new Intl.NumberFormat("pt-BR");
