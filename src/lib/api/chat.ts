@@ -1,4 +1,6 @@
-// Contrato com o backend (porta 8080) — POST /api/chat
+// Contrato com o backend (porta 8080) — POST /api/chat (exige JWT: Authorization: Bearer <token>)
+
+import { clearSession, getToken } from "@/lib/auth";
 
 export type ChatRole = "user" | "assistant" | "system";
 
@@ -73,17 +75,32 @@ export async function sendChat(
     ...(options.completionText ? { completionText: options.completionText } : {}),
   };
 
+  const token = getToken();
+  if (!token) {
+    clearSession();
+    throw new ApiError("Sua sessão expirou. Entre novamente.", 401);
+  }
+
   let response: Response;
   try {
     response = await fetch(`${API_BASE_URL}/api/chat`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(body),
       ...(options.signal ? { signal: options.signal } : {}),
     });
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ApiError("Não foi possível conectar ao backend (porta 8080). Ele está em execução?");
+  }
+
+  if (response.status === 401) {
+    clearSession();
+    throw new ApiError("Sua sessão expirou. Entre novamente.", 401);
   }
 
   if (!response.ok) {

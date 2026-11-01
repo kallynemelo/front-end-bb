@@ -27,7 +27,7 @@ export const Route = createFileRoute("/login")({
 function LoginPage() {
   const { login, status } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -45,7 +45,7 @@ function LoginPage() {
     setError(null);
 
     try {
-      await login(email, password);
+      await login(username, password);
     } catch (caught) {
       setError(caught instanceof AuthError ? caught.message : "Não foi possível entrar agora.");
       setIsSubmitting(false);
@@ -67,16 +67,17 @@ function LoginPage() {
         }
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FormField id="email" label="E-mail">
+          <FormField id="username" label="Usuário">
             <Input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
+              id="username"
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="seu@email.com"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="seu.usuario"
               className={authInputClass}
             />
           </FormField>

@@ -27,9 +27,9 @@ export const Route = createFileRoute("/cadastro")({
 function RegisterPage() {
   const { register, status } = useAuth();
   const navigate = useNavigate();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -41,11 +41,16 @@ function RegisterPage() {
     event.preventDefault();
     if (isSubmitting) return;
 
+    if (password !== confirmPassword) {
+      setError("As senhas não coincidem. Digite a mesma senha nos dois campos.");
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
     try {
-      await register(name, email, password);
+      await register(username, password);
     } catch (caught) {
       setError(
         caught instanceof AuthError ? caught.message : "Não foi possível criar a conta agora.",
@@ -69,29 +74,24 @@ function RegisterPage() {
         }
       >
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <FormField id="name" label="Nome">
+          <FormField
+            id="username"
+            label="Usuário"
+            hint="De 3 a 30 caracteres: letras minúsculas, números, ponto, hífen ou underline."
+          >
             <Input
-              id="name"
+              id="username"
               type="text"
-              autoComplete="name"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
               required
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder="Como você quer ser chamado(a)"
-              className={authInputClass}
-            />
-          </FormField>
-
-          <FormField id="email" label="E-mail">
-            <Input
-              id="email"
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="seu@email.com"
+              minLength={3}
+              maxLength={30}
+              pattern="[a-zA-Z0-9._\-]{3,30}"
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="seu.usuario"
               className={authInputClass}
             />
           </FormField>
@@ -109,6 +109,18 @@ function RegisterPage() {
               value={password}
               onChange={(event) => setPassword(event.target.value)}
               placeholder="Crie uma senha"
+            />
+          </FormField>
+
+          <FormField id="confirm-password" label="Confirmar senha">
+            <PasswordInput
+              id="confirm-password"
+              autoComplete="new-password"
+              required
+              minLength={MIN_PASSWORD_LENGTH}
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+              placeholder="Repita a senha"
             />
           </FormField>
 
