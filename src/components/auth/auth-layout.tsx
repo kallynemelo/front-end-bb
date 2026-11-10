@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 const HIGHLIGHTS = [
-  { icon: Zap, label: "Energia", detail: "consumo em Wh" },
-  { icon: Leaf, label: "CO₂e", detail: "emissões em gramas" },
-  { icon: Droplets, label: "Água", detail: "uso em mL" },
+  { icon: Zap, label: "Energia", detail: "Consumo em Wh" },
+  { icon: Leaf, label: "CO₂e", detail: "Emissões em gramas" },
+  { icon: Droplets, label: "Água", detail: "Uso em mL" },
 ];
 
 /** Tela dividida: painel azul da marca à esquerda e formulário à direita (empilha no celular). */
@@ -25,7 +25,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
             />
             <div className="leading-tight">
               <strong className="block text-2xl font-semibold tracking-[-0.02em]">ImpactaIA</strong>
-              <span className="text-sm text-white/80">Pegada ecológica de IA</span>
+              <span className="text-sm text-white/80">Pegada ecológica com IA</span>
             </div>
           </div>
 

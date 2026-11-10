@@ -10,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 const NAV_ITEMS = [
   { to: "/", label: "Calculadora", exact: true },
   { to: "/historico", label: "Histórico", exact: false },
+  { to: "/dashboard", label: "Dashboard", exact: false },
 ] as const;
 
 const navLinkClass =
@@ -80,12 +81,11 @@ function AppHeader() {
             <strong className="block max-w-56 truncate text-sm font-semibold text-white">
               {user.name}
             </strong>
-            <span className="block max-w-56 truncate text-xs text-white/80">{user.email}</span>
           </div>
           <span
             role="img"
-            aria-label={`${user.name} (${user.email})`}
-            title={user.email}
+            aria-label={user.name}
+            title={user.name}
             className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-semibold text-brand-blue md:hidden"
           >
             {initial}
@@ -105,7 +105,7 @@ function AppHeader() {
 
       {/* Menu do celular: segunda linha */}
       <nav aria-label="Principal" className="border-t border-white/15 md:hidden">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-1 px-4 py-1.5 sm:px-6">
+        <div className="mx-auto grid max-w-6xl grid-cols-3 gap-1 px-4 py-1.5 sm:px-6">
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.to}

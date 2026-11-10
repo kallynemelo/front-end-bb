@@ -19,7 +19,8 @@ export type HistoryEntry = {
   waterConsumedMl: number;
 };
 
-const MAX_ENTRIES = 100;
+// Guarda até 500 cálculos por usuário (o Dashboard usa até 90 dias de histórico).
+const MAX_ENTRIES = 500;
 
 function keyFor(email: string) {
   return `impactaia:history:${email}`;

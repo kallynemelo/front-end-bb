@@ -3,17 +3,7 @@ import { ChevronDown, Droplets, History, Leaf, Trash2, Zap } from "lucide-react"
 import { useState } from "react";
 
 import { AppShell } from "@/components/app-shell/app-shell";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { formatImpact } from "@/lib/format";
@@ -83,27 +73,15 @@ function HistoryContent() {
         </div>
 
         {entries.length > 0 ? (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button type="button" size="sm" variant="outline" className="h-9 shadow-none">
-                <Trash2 aria-hidden="true" />
-                Limpar histórico
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Limpar todo o histórico?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Os {integer.format(entries.length)} cálculos salvos serão apagados e não poderão
-                  ser recuperados.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                <AlertDialogAction onClick={clearAll}>Limpar histórico</AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <ConfirmDeleteDialog
+            onConfirm={clearAll}
+            description={`Os ${integer.format(entries.length)} cálculos salvos serão apagados e não poderão ser recuperados.`}
+          >
+            <Button type="button" size="sm" variant="outline" className="h-9 shadow-none">
+              <Trash2 aria-hidden="true" />
+              Limpar histórico
+            </Button>
+          </ConfirmDeleteDialog>
         ) : null}
       </div>
 
@@ -218,16 +196,20 @@ function HistoryItem({ entry, onRemove }: { entry: HistoryEntry; onRemove: () =>
           </span>
         </button>
 
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          onClick={onRemove}
-          aria-label="Excluir este cálculo"
-          className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+        <ConfirmDeleteDialog
+          onConfirm={onRemove}
+          description="Este cálculo será apagado do histórico e não poderá ser recuperado."
         >
-          <Trash2 aria-hidden="true" />
-        </Button>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            aria-label="Excluir este cálculo"
+            className="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 aria-hidden="true" />
+          </Button>
+        </ConfirmDeleteDialog>
       </div>
 
       <dl className="mt-3 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
