@@ -12,7 +12,8 @@ Este repositório é o **front-end**. O cálculo é feito por um back-end separa
 - **Calculadora** com seleção da IA (GPT ou Gemini), campo de prompt de entrada, campo de prompt de saída e botão **Calcular**.
 - **Resultado** com tokens (entrada, saída e total), energia (Wh), CO₂e (g) e água (mL). Valores muito pequenos são mostrados em notação científica, como `2,19 × 10⁻⁷`.
 - **Histórico** dos cálculos de cada usuário, com os dois prompts, os números de cada cálculo e o total acumulado. Dá para excluir um item ou limpar tudo.
-- **Cabeçalho** nas páginas internas com o menu Calculadora e Histórico e, à direita, nome, e-mail e botão **Sair**.
+- **Dashboard** com gráficos feitos a partir do histórico: linha (impacto por dia, com cards e filtros de métrica e de 7/30/90 dias), pizza (prompts por modelo de IA) e barras (média de tokens por prompt nos últimos 7 dias).
+- **Cabeçalho** nas páginas internas com o menu Calculadora, Histórico e Dashboard e, à direita, nome de usuário e botão **Sair**.
 - **Responsivo**: no celular o login empilha o painel azul sobre o formulário, e o menu do cabeçalho desce para uma segunda linha.
 
 ## Páginas
@@ -20,9 +21,10 @@ Este repositório é o **front-end**. O cálculo é feito por um back-end separa
 | Rota         | Descrição                                                   | Exige login |
 | ------------ | ----------------------------------------------------------- | ----------- |
 | `/login`     | Entrar na conta                                             | Não         |
-| `/cadastro`  | Criar conta gratuita (nome, e-mail, senha de 8+ caracteres) | Não         |
+| `/cadastro`  | Criar conta (usuário, senha de 8+ caracteres) | Não         |
 | `/`          | Calculadora                                                 | Sim         |
 | `/historico` | Cálculos já feitos pelo usuário logado                      | Sim         |
+| `/dashboard` | Gráficos do histórico (linha, pizza e barras)               | Sim         |
 
 Quem não está logado e abre `/` ou `/historico` é enviado para `/login`.
 
@@ -64,7 +66,7 @@ O back-end ainda não tem endpoints de login, cadastro ou histórico. Por isso, 
 | --------------------------- | ---------------------------------------------- |
 | `impactaia:users`           | Contas: nome, e-mail e hash da senha (SHA-256) |
 | `impactaia:session`         | E-mail de quem está logado                     |
-| `impactaia:history:<email>` | Histórico daquele usuário (até 100 cálculos)   |
+| `impactaia:history:<email>` | Histórico daquele usuário (até 500 cálculos)   |
 
 Consequências:
 
@@ -89,7 +91,7 @@ src/
 │   ├── auth.tsx             contas e sessão (localStorage)
 │   ├── history.ts           histórico por usuário (localStorage)
 │   └── format.ts            formatação dos números do impacto
-├── routes/                  páginas: login, cadastro, index, historico
+├── routes/                  páginas: login, cadastro, index, historico, dashboard
 └── styles.css               cores e estilos globais
 ```
 

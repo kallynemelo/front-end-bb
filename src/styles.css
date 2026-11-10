@@ -98,6 +98,8 @@
   }
 
   html {
+    /* Reserva o espaço da barra de rolagem: o cabeçalho não "anda" entre páginas curtas e longas. */
+    scrollbar-gutter: stable;
     background: var(--background);
   }
 
