@@ -1,4 +1,4 @@
-import { Calculator, Check, Copy, Droplets, Eraser, Leaf, Zap } from "lucide-react";
+import { Calculator, Check, Copy, Droplets, Eraser, ExternalLink, Leaf, Zap } from "lucide-react";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog";
@@ -19,7 +19,7 @@ const MODELS = [
 
 const integer = new Intl.NumberFormat("pt-BR");
 
-type ResultTab = "resultado" | "metodologia";
+type ResultTab = "resultado" | "metodologia" | "fontes";
 
 type CalculationResult = {
   prompt: string;
@@ -253,11 +253,28 @@ export function FootprintCalculator() {
             >
               Metodologia
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              id="sources-label"
+              aria-pressed={tab === "fontes"}
+              onClick={() => setTab("fontes")}
+              className={cn("h-8 shadow-none", tab === "fontes" && "bg-accent")}
+            >
+              Fontes
+            </Button>
           </div>
           <div
             ref={resultRef}
             role="region"
-            aria-labelledby={tab === "resultado" ? "result-label" : "methodology-label"}
+            aria-labelledby={
+              tab === "resultado"
+                ? "result-label"
+                : tab === "metodologia"
+                  ? "methodology-label"
+                  : "sources-label"
+            }
             aria-live="polite"
             className="min-h-36 scroll-mb-4 rounded-xl border border-input bg-muted/40 p-4 lg:h-[calc(100dvh-23.5rem)] lg:min-h-66 lg:overflow-y-auto"
           >
@@ -268,8 +285,10 @@ export function FootprintCalculator() {
                 isCalculating={isCalculating}
                 hasPrompt={cleanPrompt.length > 0}
               />
-            ) : (
+            ) : tab === "metodologia" ? (
               <MethodologyContent result={result} />
+            ) : (
+              <SourcesContent />
             )}
           </div>
         </div>
@@ -385,6 +404,87 @@ function ModelMethodologies() {
           </dl>
         </section>
       ))}
+    </div>
+  );
+}
+
+const SOURCES: { title: string; description: string; url: string }[] = [
+  {
+    title: "OpenAI — o que são tokens e a regra \"1 token ≈ 4 caracteres\"",
+    description: "Base do nosso fallback length / 4.0.",
+    url: "https://help.openai.com/en/articles/4936856-what-are-tokens-and-how-to-count-them",
+  },
+  {
+    title: "OpenAI — tokenizador oficial",
+    description: "Para comparar os nossos números com o real.",
+    url: "https://platform.openai.com/tokenizer",
+  },
+  {
+    title: "tiktoken",
+    description:
+      "Biblioteca Python oficial da OpenAI; mostra os encodings cl100k_base e o200k_base que usamos no JTokkit.",
+    url: "https://github.com/openai/tiktoken",
+  },
+  {
+    title: "JTokkit",
+    description:
+      "Biblioteca Java que usamos no GptTokenizer (contagem precisa dos tokens de entrada do GPT).",
+    url: "https://github.com/knuddelsgmbh/jtokkit",
+  },
+  {
+    title: "Google — documentação de tokens do Gemini",
+    description: "Regra de ~4 caracteres por token e a API countTokens.",
+    url: "https://ai.google.dev/gemini-api/docs/tokens",
+  },
+  {
+    title: "Google AI Studio",
+    description: "Onde dá para ver a contagem real de tokens do Gemini e calibrar a nossa heurística.",
+    url: "https://aistudio.google.com/",
+  },
+  {
+    title: "SentencePiece (Google)",
+    description: "Algoritmo de subwords, base do tokenizador do Gemini.",
+    url: "https://github.com/google/sentencepiece",
+  },
+  {
+    title: "Hugging Face — docs de tokenizadores",
+    description: "BPE, WordPiece e Unigram.",
+    url: "https://huggingface.co/docs/tokenizers",
+  },
+  {
+    title: "minbpe (Karpathy)",
+    description: "Implementa BPE do zero em ~100 linhas; ótimo para entender como funciona.",
+    url: "https://github.com/karpathy/minbpe",
+  },
+];
+
+function SourcesContent() {
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-sm font-semibold text-foreground">Fontes e referências</h3>
+      <ul className="flex flex-col gap-2">
+        {SOURCES.map((source) => (
+          <li key={source.url}>
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-start justify-between gap-3 rounded-xl border border-border bg-card p-3 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <span className="min-w-0">
+                <span className="block text-sm font-medium text-primary">{source.title}</span>
+                <span className="mt-0.5 block text-xs leading-5 text-muted-foreground">
+                  {source.description}
+                </span>
+                <span className="mt-0.5 block break-all text-xs text-muted-foreground/80">
+                  {source.url}
+                </span>
+              </span>
+              <ExternalLink aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            </a>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
