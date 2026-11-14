@@ -598,7 +598,7 @@ function MethodologyContent({ result }: { result: CalculationResult | null }) {
     <div className="flex flex-col gap-3">
       <div className="rounded-xl border border-border bg-card p-4">
         <h3 className="text-sm font-semibold text-foreground">Seu cálculo · modelo usado</h3>
-        <p className="mt-1 break-words font-mono text-sm leading-6 text-foreground">{data.model}</p>
+        <p className="mt-1 wrap-break-word font-mono text-sm leading-6 text-foreground">{data.model}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           O cálculo é definido pelo modelo escolhido: o GPT usa os fatores do GPT e o Gemini usa os
           fatores do Gemini.
@@ -608,7 +608,7 @@ function MethodologyContent({ result }: { result: CalculationResult | null }) {
         <section key={step.title} className="rounded-xl border border-border bg-card p-4">
           <h3 className="text-sm font-semibold text-foreground">{step.title}</h3>
           {step.lines.map((line) => (
-            <p key={line} className="mt-1 break-words font-mono text-sm leading-6 text-foreground">
+            <p key={line} className="mt-1 wrap-break-word font-mono text-sm leading-6 text-foreground">
               {line}
             </p>
           ))}
