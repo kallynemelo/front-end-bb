@@ -2,9 +2,9 @@ name: Build Front
 
 on:
   push:
-    branches: [ feature/Kallyne-fontes ]
+    branches: [ main, feature/Kallyne-fontes ]
   pull_request:
-    branches: [ feature/Kallyne-fontes ]
+    branches: [ main, feature/Kallyne-fontes ]
   workflow_dispatch:
 
 jobs:
